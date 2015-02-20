@@ -101,6 +101,7 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
         'ecommerce' => array(
             'Doctrine\Tests\Models\ECommerce\ECommerceCart',
             'Doctrine\Tests\Models\ECommerce\ECommerceCustomer',
+            'Doctrine\Tests\Models\ECommerce\ECommerceCustomerExtendedInfo',
             'Doctrine\Tests\Models\ECommerce\ECommerceProduct',
             'Doctrine\Tests\Models\ECommerce\ECommerceShipping',
             'Doctrine\Tests\Models\ECommerce\ECommerceFeature',
@@ -314,6 +315,7 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
             $conn->executeUpdate('DELETE FROM ecommerce_products_categories');
             $conn->executeUpdate('DELETE FROM ecommerce_products_related');
             $conn->executeUpdate('DELETE FROM ecommerce_carts');
+            $conn->executeUpdate('DELETE FROM ecommerce_customers_extended_info');
             $conn->executeUpdate('DELETE FROM ecommerce_customers');
             $conn->executeUpdate('DELETE FROM ecommerce_features');
             $conn->executeUpdate('DELETE FROM ecommerce_products');

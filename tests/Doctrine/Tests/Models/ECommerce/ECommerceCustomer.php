@@ -25,6 +25,12 @@ class ECommerceCustomer
     private $name;
 
     /**
+     * @OneToOne(targetEntity="ECommerceCustomerExtendedInfo", mappedBy="customer")
+     * note: cannot cascade persist is generation strategy is AUTO
+     */
+    private $extendedInfo;
+
+    /**
      * @OneToOne(targetEntity="ECommerceCart", mappedBy="customer", cascade={"persist"})
      */
     private $cart;
@@ -49,6 +55,19 @@ class ECommerceCustomer
 
     public function setName($name) {
         $this->name = $name;
+    }
+
+    public function getExtendedInfo()
+    {
+        return $this->extendedInfo;
+    }
+
+    public function setExtendedInfo(ECommerceCustomerExtendedInfo $extendedInfo)
+    {
+        if ($this->extendedInfo !== $extendedInfo) {
+            $this->extendedInfo = $extendedInfo;
+            $extendedInfo->setCustomer($this);
+        }
     }
 
     public function setCart(ECommerceCart $cart)

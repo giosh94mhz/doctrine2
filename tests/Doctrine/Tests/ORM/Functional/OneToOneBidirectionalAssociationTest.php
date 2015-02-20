@@ -4,6 +4,7 @@ namespace Doctrine\Tests\ORM\Functional;
 
 use Doctrine\Tests\Models\ECommerce\ECommerceCart;
 use Doctrine\Tests\Models\ECommerce\ECommerceCustomer;
+use Doctrine\Tests\Models\ECommerce\ECommerceCustomerExtendedInfo;
 use Doctrine\ORM\Mapping\AssociationMapping;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -77,7 +78,7 @@ class OneToOneBidirectionalAssociationTest extends \Doctrine\Tests\OrmFunctional
         $this->assertEquals('Giorgio', $cart->getCustomer()->getName());
     }
 
-    public function testInverseSideIsNeverLazy()
+    public function testInverseSideIsUsuallyEager()
     {
         $this->_createFixture();
         $metadata = $this->_em->getClassMetadata('Doctrine\Tests\Models\ECommerce\ECommerceCustomer');
@@ -88,8 +89,24 @@ class OneToOneBidirectionalAssociationTest extends \Doctrine\Tests\OrmFunctional
         $customer = $result[0];
 
         $this->assertNull($customer->getMentor());
-        $this->assertInstanceOF('Doctrine\Tests\Models\ECommerce\ECommerceCart', $customer->getCart());
+        $this->assertInstanceOf('Doctrine\Tests\Models\ECommerce\ECommerceCart', $customer->getCart());
         $this->assertNotInstanceOf('Doctrine\ORM\Proxy\Proxy', $customer->getCart());
+        $this->assertEquals('paypal', $customer->getCart()->getPayment());
+    }
+
+    public function testInverseSideIsLazyWhenPrimaryKeyIsAnAssociation()
+    {
+        $this->_createFixture();
+        $metadata = $this->_em->getClassMetadata('Doctrine\Tests\Models\ECommerce\ECommerceCustomer');
+        $metadata->associationMappings['mentor']['fetch'] = ClassMetadata::FETCH_EAGER;
+
+        $query = $this->_em->createQuery('select c from Doctrine\Tests\Models\ECommerce\ECommerceCustomer c');
+        $result = $query->getResult();
+        $customer = $result[0];
+
+        $this->assertNull($customer->getMentor());
+        $this->assertInstanceOf('Doctrine\Tests\Models\ECommerce\ECommerceCustomerExtendedInfo', $customer->getExtendedInfo());
+        $this->assertInstanceOf('Doctrine\ORM\Proxy\Proxy', $customer->getCart());
         $this->assertEquals('paypal', $customer->getCart()->getPayment());
     }
 
@@ -137,7 +154,14 @@ class OneToOneBidirectionalAssociationTest extends \Doctrine\Tests\OrmFunctional
         $customer->setCart($cart);
 
         $this->_em->persist($customer);
+        $this->_em->flush();
 
+        $extInfo = new ECommerceCustomerExtendedInfo;
+        $extInfo->setCustomer($customer);
+        $extInfo->setSubscription(new \DateTime('2015-02-01'));
+        $extInfo->setLastLogin(new \DateTime('2015-02-20'));
+
+        $this->_em->persist($extInfo);
         $this->_em->flush();
         $this->_em->clear();
     }
